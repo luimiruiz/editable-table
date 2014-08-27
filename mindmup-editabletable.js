@@ -41,14 +41,16 @@ $.fn.editableTableWidget = function (options) {
 					active.html(originalContent);
 				}
 			},
-			movement = function (element, keycode) {
-				if (keycode === ARROW_RIGHT) {
+			movement = function (element, keycode, start, end) {
+				start = (typeof start === 'undefined') ? true : start;
+				end = (typeof end === 'undefined') ? true : end;
+				if (keycode === ARROW_RIGHT && end) {
 					return element.next('td');
-				} else if (keycode === ARROW_LEFT) {
+				} else if (keycode === ARROW_LEFT && start) {
 					return element.prev('td');
-				} else if (keycode === ARROW_UP) {
+				} else if (keycode === ARROW_UP && start) {
 					return element.parent().prev().children().eq(element.index());
-				} else if (keycode === ARROW_DOWN) {
+				} else if (keycode === ARROW_DOWN && end) {
 					return element.parent().next().children().eq(element.index());
 				}
 				return [];
@@ -71,8 +73,13 @@ $.fn.editableTableWidget = function (options) {
 				active.focus();
 			} else if (e.which === TAB) {
 				active.focus();
-			} else if (this.selectionEnd - this.selectionStart === this.value.length) {
-				var possibleMove = movement(active, e.which);
+			} else {
+				var possibleMove = movement(
+					active, 
+					e.which, 
+					this.selectionEnd===0, 
+					this.selectionStart===this.value.length
+				);
 				if (possibleMove.length > 0) {
 					possibleMove.focus();
 					e.preventDefault();
