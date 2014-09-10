@@ -2,19 +2,23 @@
 $.fn.editableTableWidget = function (options) {
 	'use strict';
 	return $(this).each(function () {
+		if(!$.isArray(options.editor))options.editor=[options.editor];
 		var buildDefaultOptions = function () {
 				var opts = $.extend({}, $.fn.editableTableWidget.defaultOptions);
-				opts.editor = opts.editor.clone();
+				opts.editor = [opts.editor.clone()];
 				return opts;
 			},
 			activeOptions = $.extend(buildDefaultOptions(), options),
 			ARROW_LEFT = 37, ARROW_UP = 38, ARROW_RIGHT = 39, ARROW_DOWN = 40, ENTER = 13, ESC = 27, TAB = 9,
 			element = $(this),
-			editor = activeOptions.editor.css('position', 'absolute').hide().appendTo(element.parent()),
+			editors = activeOptions.editor,
+			editor,
 			active,
 			showEditor = function (select) {
-				active = element.find('td:focus');
+				active = element.find('td:not([noedit]):focus');
 				if (active.length) {
+					var index = active.index();
+					editor = (editors[index]) ? editors[index] : editors[0];
 					editor.val(active.text())
 						.removeClass('error')
 						.show()
@@ -55,47 +59,50 @@ $.fn.editableTableWidget = function (options) {
 				}
 				return [];
 			};
-		editor.blur(function () {
-			setActiveText();
-			editor.hide();
-		}).keydown(function (e) {
-			if (e.which === ENTER) {
+		$.each(editors,function(key,ed){
+			ed.blur(function () {
 				setActiveText();
 				editor.hide();
-				active.focus();
-				e.preventDefault();
-				e.stopPropagation();
-			} else if (e.which === ESC) {
-				editor.val(active.text());
-				e.preventDefault();
-				e.stopPropagation();
-				editor.hide();
-				active.focus();
-			} else if (e.which === TAB) {
-				active.focus();
-			} else {
-				var possibleMove = movement(
-					active, 
-					e.which, 
-					this.selectionEnd===0, 
-					this.selectionStart===this.value.length
-				);
-				if (possibleMove.length > 0) {
-					possibleMove.focus();
+			}).keydown(function (e) {
+				if (e.which === ENTER) {
+					setActiveText();
+					editor.hide();
+					active.focus();
 					e.preventDefault();
 					e.stopPropagation();
+				} else if (e.which === ESC) {
+					editor.val(active.text());
+					e.preventDefault();
+					e.stopPropagation();
+					editor.hide();
+					active.focus();
+				} else if (e.which === TAB) {
+					active.focus();
+				} else {
+					var possibleMove = movement(
+						active, 
+						e.which, 
+						this.selectionEnd===0, 
+						this.selectionStart===this.value.length
+					);
+					if (possibleMove.length > 0) {
+						possibleMove.focus();
+						e.preventDefault();
+						e.stopPropagation();
+					}
 				}
-			}
-		})
-		.on('input paste', function () {
-			var evt = $.Event('validate');
-			active.trigger(evt, editor.val());
-			if (evt.result === false) {
-				editor.addClass('error');
-			} else {
-				editor.removeClass('error');
-			}
+			})
+			.on('input paste', function () {
+				var evt = $.Event('validate');
+				active.trigger(evt, editor.val());
+				if (evt.result === false) {
+					editor.addClass('error');
+				} else {
+					editor.removeClass('error');
+				}
+			});
 		});
+		
 		element.on('click keypress dblclick', showEditor)
 		.css('cursor', 'pointer')
 		.keydown(function (e) {
@@ -118,6 +125,10 @@ $.fn.editableTableWidget = function (options) {
 		});
 
 		element.find('td').prop('tabindex', 1);
+
+		$.each(editors,function(key,ed){
+			ed.css('position', 'absolute').hide().appendTo(element.parent());
+		});
 
 		$(window).on('resize', function () {
 			if (editor.is(':visible')) {
