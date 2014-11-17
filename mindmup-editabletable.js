@@ -2,7 +2,8 @@
 $.fn.editableTableWidget = function (options) {
 	'use strict';
 	return $(this).each(function () {
-		if(!$.isArray(options.editor))options.editor=[options.editor];
+		if(options)
+			if(!$.isArray(options.editor))options.editor=[options.editor];
 		var buildDefaultOptions = function () {
 				var opts = $.extend({}, $.fn.editableTableWidget.defaultOptions);
 				opts.editor = [opts.editor.clone()];
@@ -15,8 +16,11 @@ $.fn.editableTableWidget = function (options) {
 			editor,
 			active,
 			showEditor = function (select) {
+				
 				active = element.find('td:not([noedit]):focus');
 				if (active.length) {
+					evt = $.Event('show')
+					active.trigger(evt);
 					var index = active.index();
 					editor = (editors[index]) ? editors[index] : editors[0];
 					editor.val(active.text())
