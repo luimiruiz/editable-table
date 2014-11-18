@@ -22,7 +22,6 @@ $.fn.editableTableWidget = function (options) {
 			},
 			showEditor = function (select) {
 				active = element.find('td:not([noedit]):focus');
-				console.log(element)
 				if (active.length) {
 					var evt = $.Event('show')
 					active.trigger(evt);
