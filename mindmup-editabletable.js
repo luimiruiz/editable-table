@@ -21,8 +21,8 @@ $.fn.editableTableWidget = function (options) {
 				editor.hide()
 			},
 			showEditor = function (select) {
-				
 				active = element.find('td:not([noedit]):focus');
+				console.log(element)
 				if (active.length) {
 					var evt = $.Event('show')
 					active.trigger(evt);
@@ -112,6 +112,10 @@ $.fn.editableTableWidget = function (options) {
 			});
 		});
 		
+		element.on('DOMSubtreeModified', function(){
+			element.find('td').prop('tabindex', 1)
+		})
+
 		element.on('click keypress dblclick', showEditor)
 		.css('cursor', 'pointer')
 		.keydown(function (e) {

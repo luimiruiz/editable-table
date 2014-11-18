@@ -144,7 +144,7 @@ $('table td').on('change', function(evt, newValue) {
 
 <script>
   $('#mainTable').editableTableWidget().on('hide',function(e,c,d){
-    console.log(e.target,c,d)
+    $('#mainTable').append("<tr><td>Segway</td><td>330</td><td>240</td><td>1</td></tr>")
   });
   $('#textAreaEditor').editableTableWidget({editor: $('<textarea>')});
   window.prettyPrint && prettyPrint();
