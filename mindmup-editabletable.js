@@ -15,11 +15,16 @@ $.fn.editableTableWidget = function (options) {
 			editors = activeOptions.editor,
 			editor,
 			active,
+			hideEditor = function (editor,active) {
+				var evt = $.Event('hide')
+				active.trigger(evt, editor.val(), active);
+				editor.hide()
+			},
 			showEditor = function (select) {
 				
 				active = element.find('td:not([noedit]):focus');
 				if (active.length) {
-					evt = $.Event('show')
+					var evt = $.Event('show')
 					active.trigger(evt);
 					var index = active.index();
 					editor = (editors[index]) ? editors[index] : editors[0];
@@ -66,11 +71,11 @@ $.fn.editableTableWidget = function (options) {
 		$.each(editors,function(key,ed){
 			ed.blur(function () {
 				setActiveText();
-				editor.hide();
+				hideEditor(editor, active);
 			}).keydown(function (e) {
 				if (e.which === ENTER) {
 					setActiveText();
-					editor.hide();
+					hideEditor(editor, active);
 					active.focus();
 					e.preventDefault();
 					e.stopPropagation();
@@ -78,7 +83,7 @@ $.fn.editableTableWidget = function (options) {
 					editor.val(active.text());
 					e.preventDefault();
 					e.stopPropagation();
-					editor.hide();
+					hideEditor(editor, active);
 					active.focus();
 				} else if (e.which === TAB) {
 					active.focus();
